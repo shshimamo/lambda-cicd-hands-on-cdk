@@ -62,6 +62,7 @@ export class LambdaCicdHandsOnCdkStack extends cdk.Stack {
         includeBuildId: false,
         packageZip: false,
         identifier: 'BuildArtifact',
+        name: `${Context.ID_PREFIX}-lambda-cicd-hands-on`
       }),
     });
     buildProject.addToRolePolicy(
