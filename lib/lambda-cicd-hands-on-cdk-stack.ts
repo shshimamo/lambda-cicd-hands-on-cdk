@@ -13,17 +13,11 @@ export class LambdaCicdHandsOnCdkStack extends cdk.Stack {
     super(scope, id, props);
 
     // S3
-    // const bucket = new s3.Bucket(this, 'SamBucket', {
-    //   bucketName: 'lambda-cicd-sam-bucket',
-    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
-    //   autoDeleteObjects: true,
-    // });
-    // 既存のS3バケットを取得
-    const bucket = s3.Bucket.fromBucketArn(
-        this,
-        'SamBucket',
-        'arn:aws:s3:::aws-sam-cli-managed-default-samclisourcebucket-54jwrv7zzvrf'
-    )
+    const bucket = new s3.Bucket(this, 'SamBucket', {
+      bucketName: 'lambda-cicd-sam-bucket',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
 
     // CodeBuild ビルドプロジェクト
     const buildProjectLogGroup = new logs.LogGroup(this, 'BuildProjectDevLogGroup', {
