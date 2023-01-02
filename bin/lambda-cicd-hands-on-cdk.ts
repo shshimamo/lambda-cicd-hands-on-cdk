@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { LambdaCicdHandsOnCdkStack } from '../lib/lambda-cicd-hands-on-cdk-stack';
+import { InfrastructureStack } from '../lib/infrastructure-stack';
+import { PipelineDevStack } from '../lib/pipeline-dev-stack';
 import { Context } from '../lib/common/context'
 
 const app = new cdk.App();
-new LambdaCicdHandsOnCdkStack(app, `${Context.ID_PREFIX}-Stack`, {
+
+const infra = new InfrastructureStack(app, `${Context.ID_PREFIX}-InfrastructureStack`, {
     env: {account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION},
+});
+
+new PipelineDevStack(app, `${Context.ID_PREFIX}-PipelineDevStack`, {
+    env: {account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION},
+    bucket: infra.bucket,
 });
