@@ -31,7 +31,7 @@ export class LambdaCicdHandsOnCdkStack extends cdk.Stack {
         branchOrRef: 'main'
       }),
       environment: {
-        buildImage: codebuild.LinuxBuildImage.STANDARD_6_0,
+        buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_4,
         // privileged: true,
       },
       logging: {
