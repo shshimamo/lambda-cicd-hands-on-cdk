@@ -27,7 +27,8 @@ export class LambdaCicdHandsOnCdkStack extends cdk.Stack {
       source: codebuild.Source.gitHub({
         owner: 'shshimamo',
         repo: 'lambda-cicd-hands-on',
-        webhook: true
+        webhook: true,
+        branchOrRef: 'main'
       }),
       environment: {
         buildImage: codebuild.LinuxBuildImage.STANDARD_6_0,
@@ -99,7 +100,7 @@ export class LambdaCicdHandsOnCdkStack extends cdk.Stack {
 
     // CodePipeline ビルドステージを追加
     const buildAction = new codepipeline_actions.CodeBuildAction({
-      actionName: `${Context.ID_PREFIX}-frontend-build`,
+      actionName: `${Context.ID_PREFIX}-build`,
       project: buildProject,
       input: sourceOutput,
       environmentVariables: {
