@@ -16,7 +16,9 @@ export class PipelineDevStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: PipelineDevStackProps) {
         super(scope, id, props);
 
-        // CodeBuild ビルドプロジェクト
+        /*
+            CodeBuild ビルドプロジェクト
+         */
         const buildProjectLogGroup = new logs.LogGroup(this, 'BuildProjectDevLogGroup', {
             logGroupName: `${Context.ID_PREFIX}-build-project`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -77,12 +79,14 @@ export class PipelineDevStack extends cdk.Stack {
             })
         )
 
-        // CodePipeline(開発環境用)
+        /*
+            CodePipeline(開発環境用)
+         */
         const pipeline = new codepipeline.Pipeline(this, 'PipelineDev', {
             pipelineName: `${Context.ID_PREFIX}-lambda-hands-on-dev`
         });
 
-        // CodePipeline ソースステージを追加
+        // ソースステージを追加
         const sourceOutput = new codepipeline.Artifact();
         const sourceAction = new codepipeline_actions.GitHubSourceAction({
             actionName: 'GitHub_Source',
@@ -98,7 +102,7 @@ export class PipelineDevStack extends cdk.Stack {
             actions: [sourceAction],
         });
 
-        // CodePipeline ビルドステージを追加
+        // ビルドステージを追加
         const buildAction = new codepipeline_actions.CodeBuildAction({
             actionName: `${Context.ID_PREFIX}-build`,
             project: buildProject,
@@ -117,6 +121,50 @@ export class PipelineDevStack extends cdk.Stack {
         pipeline.addStage({
             stageName: 'Build',
             actions: [buildAction],
+        });
+
+        /*
+            CodePipeline(本番環境用)
+         */
+        const pipelinePrd = new codepipeline.Pipeline(this, 'PipelinePrd', {
+            pipelineName: `${Context.ID_PREFIX}-lambda-hands-on-prd`
+        });
+
+        // ソースステージを追加
+        const sourceOutputPrd = new codepipeline.Artifact();
+        const sourceActionPrd = new codepipeline_actions.GitHubSourceAction({
+            actionName: 'GitHub_Source',
+            owner: 'shshimamo',
+            repo: 'lambda-cicd-hands-on',
+            branch: 'PRODUCTION',
+            oauthToken: cdk.SecretValue.secretsManager('my-github-token'),
+            trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
+            output: sourceOutputPrd,
+        });
+        pipelinePrd.addStage({
+            stageName: 'Source',
+            actions: [sourceActionPrd],
+        });
+
+        // ビルドステージを追加
+        const buildActionPrd = new codepipeline_actions.CodeBuildAction({
+            actionName: `${Context.ID_PREFIX}-build`,
+            project: buildProject,
+            input: sourceOutputPrd,
+            environmentVariables: {
+                STACKNAME: {
+                    type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+                    value: `${Context.ID_PREFIX}-sam-app-prd`,
+                },
+                ENV: {
+                    type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+                    value: 'prd',
+                }
+            },
+        });
+        pipelinePrd.addStage({
+            stageName: 'Build',
+            actions: [buildActionPrd],
         });
     }
 }
