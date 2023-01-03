@@ -5,17 +5,17 @@ import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Construct } from 'constructs';
 import { Context } from './common/context'
 
-interface PipelineDevStackProps extends cdk.StackProps {
+interface PipelinePrdStackProps extends cdk.StackProps {
     buildProject: codebuild.Project
 }
 
-export class PipelineDevStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props: PipelineDevStackProps) {
+export class PipelinePrdStack extends cdk.Stack {
+    constructor(scope: Construct, id: string, props: PipelinePrdStackProps) {
         super(scope, id, props);
 
-        // CodePipeline(開発環境用)
-        const pipeline = new codepipeline.Pipeline(this, 'PipelineDev', {
-            pipelineName: `${Context.ID_PREFIX}-lambda-hands-on-dev`,
+        // CodePipeline(本番環境用)
+        const pipeline = new codepipeline.Pipeline(this, 'PipelinePrd', {
+            pipelineName: `${Context.ID_PREFIX}-lambda-hands-on-prd`
         });
 
         // ソースステージを追加
@@ -24,7 +24,7 @@ export class PipelineDevStack extends cdk.Stack {
             actionName: 'GitHub_Source',
             owner: 'shshimamo',
             repo: 'lambda-cicd-hands-on',
-            branch: 'main',
+            branch: 'PRODUCTION',
             oauthToken: cdk.SecretValue.secretsManager('my-github-token'),
             trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
             output: sourceOutput,
@@ -42,11 +42,11 @@ export class PipelineDevStack extends cdk.Stack {
             environmentVariables: {
                 STACKNAME: {
                     type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-                    value: `${Context.ID_PREFIX}-sam-app-dev`,
+                    value: `${Context.ID_PREFIX}-sam-app-prd`,
                 },
                 ENV: {
                     type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-                    value: 'dev',
+                    value: 'prd',
                 }
             },
         });
